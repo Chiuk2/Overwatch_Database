@@ -1,6 +1,6 @@
 # Overwatch_DB
 
-This is a web application that utilizes [OWAPI](https://github.com/SunDwarf/OWAPI), an unofficial API (by [SunDwarf](https://github.com/SunDwarf)) that gets read-only information about player statistics in the game Overwatch by Blizzard, and displays the JSON format data into a nicer web page to display the player's stats and achievements.
+This is a web application that utilizes [OWAPI](https://github.com/SunDwarf/OWAPI), an unofficial API (by [SunDwarf](https://github.com/SunDwarf)) that gets read-only information about player statistics in the game Overwatch by Blizzard, and displays the JSON format data into a nicer web page to display the player's stats and achievements. AngularJS for framework and Bootstrap for styling were used for this web app. 
 
 The **live version of the web app** is on [https://overwatchdb-c1684.firebaseapp.com/](https://overwatchdb-c1684.firebaseapp.com/) hosted on Firebase. 
 
