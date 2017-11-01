@@ -1,0 +1,991 @@
+<html ng-app="myApp">
+        <head>
+            <title>Overwatch DB</title>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-animate.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-aria.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-messages.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/1.1.1/angular-chart.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.1.5/angular-material.min.js"></script>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">        
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap.block-grid/latest/bootstrap4-block-grid.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.1.5/angular-material.min.css">
+            <script src="app.js"></script>
+            <link rel="stylesheet" href="style.css">
+        </head>
+        <body>
+            <div ng-controller="StatsController" >
+                <nav class ="navbar narvar-dark bg-dark">
+                    <a class="navbar-brand" href="#">Overwatch <span class="yellow-text">DB</span></a>
+                    <form class="form-inline">
+                        <div class="input-group search-bar">
+                            <input class="form-control mr-sm-2" type="text" ng-model="search" placeholder="Enter BattleTag"
+                            autofocus />
+                            <button class="btn btn-outline-success" type="submit" ng-click="update()" data-dismiss="modal">Search</button>
+                        </div>
+                    </form>
+                </nav>
+                <div ng-if="!stats" class="loading-font" >{{Loading}}</div>
+                <div ng-if="stats" class="container">
+                    <div ng-if="user">
+                    <div class="card" >
+                        <div class="card-body">
+                            <div class="cardContent">
+                                <div style="float:left">
+                                <img ng-if="icon" ng-src="{{icon}}" style="border:5px solid white; width:128px;height:128px;"/>
+                                </div>
+                                <div style="float:left">
+                                <tabel style="width:100%">
+                                    <tr>
+                                        <td>
+                                            <span style="text-transform: uppercase;" class="player-font">&nbsp {{username}}</span>
+                                            <span ng-if="usernum" style="font-size: 16px" class="bnet-num">#{{usernum}}</span>
+                                        </td>
+                                          
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="levels">
+                                                    <span class="playerLevel">&nbsp &nbsp &nbsp LEVEL {{level}}</span>
+                                                    <span>&nbsp &nbsp &nbsp <img ng-if="rankIcon" ng-src="{{rankIcon}}" style="width:40px;height:40px;"/> </span>
+                                                    <span class="playerRank"> {{rank}}</span>
+                                                </div>
+                                        </td>
+                                       
+                                    </tr>
+                                </tabel>
+                                </div>
+                                <div style="float:right" >
+                                    <img ng-if="TopHero" ng-src="{{TopHero}}"/>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <br/>
+                        
+                        <ul class = "nav nav-pills">
+                            <li ng-class="{active: isSet(1)}"><a href="#" style="text-decoration: none" ng-click="setTab(1)">Overview</a></li>
+                            <li ng-class="{active: isSet(2)}"><a href="#" style="text-decoration: none" ng-click="setTab(2)">Achievements</a></li>
+                        </ul>
+                                
+                                    <div ng-show="isSet(1)">
+                                        <br/>
+                                        <div ng-if="currentMode == 'Recent Competitive'">
+                                                <form name="myForm">
+                                                        <label for="modeSelect">CAREER STATS   </label>
+                                                        <select name="modeSelect" ng-model="currentMode" ng-options="x for x in modes" ng-change="changeGraph(currentMode, currentCompare)"></select>
+                                                    </form>
+                                                            <hr>
+                                            <div class="row">
+                                                <div class="col" >Eliminations-Most in Game: 
+                                                    <p>{{elims}}</p></div> 
+                                                <div class="col">Final Blows-Most in Game: 
+                                                    <p>{{finBlows}}</p></div>
+                                                <div class="col">Objective Kills-Most in Game: 
+                                                    <p>{{objKills}}</p></div>
+                                                <div class="col">Objective Time-Most in Game: 
+                                                    <p>{{min}}:{{sec}}</p></div>     
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">Damage Done-Most in Game:
+                                                    <p>{{damDone}}</p></div>  
+                                                <div class="col">Healing Done-Most in Game:
+                                                    <p>{{healDone}}</p></div> 
+                                                <div class="col">Time on Fire-Most in Game:
+                                                    <p>{{minF}}:{{secF}}</p></div>    
+                                                <div class="col">Solo Kills-Most in Game:
+                                                    <p>{{soloKills}}</p></div>  
+                                                </div>
+                                                <br/>
+                                                <form name="myGraph">
+                                                        <label for="compareSelect">HERO COMPARISON   </label>
+                                                        <select name="compareSelect" ng-model="currentCompare" ng-options="x for x in compare" ng-change="compareGraph(currentMode, currentCompare)">
+                                                            <option>Time Played</option>
+                                                        </select>
+                                                    </form>
+                                                            <hr>
+                                            <canvas id="chart" class="chart chart-horizontal-bar" chart-data="hrs" chart-labels="heroes" chart-colors="fillColor"></canvas>
+                                        </div>
+                                    </div>
+                                    <div ng-show="isSet(2)">
+                                        <br/>
+                                        <div ng-switch="currentAchievement">
+                                                <form name="myAchievements">
+                                                        <label for="achievementSelect">{{currentAchievement}}</label>
+                                                        <select name="achievementSelect" ng-model="currentAchievement" ng-options="x for x in achievements"></select>
+                                                    </form>    
+                                                    <hr>
+                                            <div ng-switch-when= "General">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="blackjack" ng-src="{{blackjack}}"  style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>BLACKJACK</h3>
+                                                                        <p>EARN 21 POSTGAME CARDS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="centenary" ng-src="{{centenary}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>CENENTARY</h3>
+                                                                        <p>WIN 100 GAMES IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="decked_out" ng-src="{{decked_out}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DECKED OUT</h3>
+                                                                        <p>COLLECT 50 UNLOCKS FOR A SINGLE HERO.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="decorated" ng-src="{{decorated}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DECORATED</h3>
+                                                                        <p>EARN 50 POSTGAME MEDALS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="level_10" ng-src="{{level_10}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>LEVEL 10</h3>
+                                                                        <p>REACH LEVEL 10.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="level_25" ng-src="{{level_25}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>LEVEL 25</h3>
+                                                                        <p>REACH LEVEL 25.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="level_50" ng-src="{{level_50}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>LEVEL 50</h3>
+                                                                        <p>REACH LEVEL 50.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="survival_expert" ng-src="{{survival_expert}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SURVIVAL EXPERT</h3>
+                                                                        <p>USE HEALTH PACKS TO HEAL 900 HEALTH IN A SINGLE LIFE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_friend_zone" ng-src="{{the_friend_zone}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE FRIEND ZONE</h3>
+                                                                        <p>PLAY A QUICK OR COMPETITIVE PLAY GAME IN A GROUP WITH A FRIEND.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_path_is_closed" ng-src="{{the_path_is_closed}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE PATH IS CLOSED</h3>
+                                                                        <p>DESTROY 3 OF SYMMETRA'S TELEPORTERS IN A SINGLE QUICK OR COMPETITIVE PLAY GAME.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="undying" ng-src="{{undying}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>UNDYING</h3>
+                                                                        <p>GET A 20 PLAYER KILL STREAK IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                    </md-content>
+                                                </div>
+                                                
+                                            </div>
+                                            <div ng-switch-when= "Offense">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="air_strike" ng-src="{{air_strike}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>AIR STRIKE</h3>
+                                                                        <p>GET A KILLING BLOW WITH DOOMFIST'S FULL-POWER SEISMIC SLAM IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="clearing_the_area" ng-src="{{clearing_the_area}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>CLEARING THE AREA</h3>
+                                                                        <p>KNOCK AN ENEMY TO THEIR DEATH USING PHARAH'S CONCUSSIVE BLAST IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="cratered" ng-src="{{cratered}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>CRATERED</h3>
+                                                                        <p>HIT 6 ENEMIES WITH A SINGLE USE OF DOOMFIST'S METEOR STRIKE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="death_from_above" ng-src="{{death_from_above}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DEATH FROM ABOVE</h3>
+                                                                        <p>KILL 4 ENEMIES IN A ROW WITHOUT TOUCHING THE GROUND AS PHARAH IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="die_die_die_die" ng-src="{{die_die_die_die}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DIE DIE DIE... DIE</h3>
+                                                                        <p>KILL 4 ENEMIES WITH A SINGLE USE OF REAPER'S DEATH BLOSSOM IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="hack_the_planet" ng-src="{{hack_the_planet}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HACK THE PLANET</h3>
+                                                                        <p>HACK 15 ENEMIES WITHOUT DYING AS SOMBRA IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="its_high_noon" ng-src="{{its_high_noon}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>IT'S HIGH NOON</h3>
+                                                                        <p>GET 4 KILLING BLOWS WITH A SINGLE USE OF MCCREE'S DEADEYE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="power_outage" ng-src="{{power_outage}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>POWER OUTAGE</h3>
+                                                                        <p>HACK 6 ENEMIES AT ONCE AS SOMBRA IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="rocket_man" ng-src="{{rocket_man}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ROCKET MAN</h3>
+                                                                        <p>GET 2 KILLING BLOWS WITH A SINGLE USE OF SOLDIER: 76'S HELIX ROCKETS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="slice_and_dice" ng-src="{{slice_and_dice}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SLICE AND DICE</h3>
+                                                                        <p>KILL 4 ENEMIES WITH A SINGLE USE OF GENJI'S DRAGONBLADE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="special_delivery" ng-src="{{special_delivery}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SPECIAL DELIVERY</h3>
+                                                                        <p>STICK 4 OF TRACER'S PULSE BOMBS ONTO ENEMIES IN A SINGLE QUICK OR COMPETITIVE PLAY GAME.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="target_rich_environment" ng-src="{{target_rich_environment}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>TARGET RICH ENVIRONMENT</h3>
+                                                                        <p>KILL 4 ENEMIES WITH A SINGLE USE OF SOLDIER: 76'S TACTICAL VISOR IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="their_own_worst_enemy" ng-src="{{their_own_worst_enemy}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THEIR OWN WORST ENEMY</h3>
+                                                                        <p>KILL 2 ENEMIES WITH A SINGLE USE OF GENJI'S DEFLECTION IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div> 
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="total_recall" ng-src="{{total_recall}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>TOTAL RECALL</h3>
+                                                                        <p>RECOVER 400 HEALTH USING TRACER'S RECALL WITHOUT DYING IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div> 
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="waste_not_want_not" ng-src="{{waste_not_want_not}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>WASTE NOT, WANT NOT</h3>
+                                                                        <p>GET 3 SOLO KILLS WITH A SINGLE CLIP OF REAPER'S SHOTGUNS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>   
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="whoa_there" ng-src="{{whoa_there}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>WHOA THERE</h3>
+                                                                        <p>INTERRUPT AN ENEMY ULTIMATE ABILITY WITH MCCREE'S FLASHBANG IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>  
+                                                        </div>
+                                                    </md-content>
+                                                </div>
+                                            </div>
+                                            <div ng-switch-when= "Defense">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="armor_up" ng-src="{{armor_up}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ARMOR UP!</h3>
+                                                                        <p>HAVE ONE OF TORBJÖRN'S ARMOR PACKS ON 5 ALLIES AT THE SAME TIME IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="charge" ng-src="{{charge}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>CHARGE!</h3>
+                                                                        <p>KILL 4 ENEMIES WITH A SINGLE USE OF BASTION'S CONFIGURATION: TANK IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="cold_snap" ng-src="{{cold_snap}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>COLD SNAP</h3>
+                                                                        <p>FREEZE 4 ENEMIES AT ONCE WITH MEI IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="did_that_sting" ng-src="{{did_that_sting}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DID THAT STING?</h3>
+                                                                        <p>KILL 4 ENEMIES USING WIDOWMAKER'S VENOM MINE DURING A SINGLE QUICK OR COMPETITIVE PLAY GAME.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="ice_blocked" ng-src="{{ice_blocked}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ICE BLOCKED</h3>
+                                                                        <p>BLOCK 1200 DAMAGE WITH A SINGLE USE OF MEI'S ICE WALL IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="mine_like_a_steel_trap" ng-src="{{mine_like_a_steel_trap}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>MINE LIKE A STEEL TRAP</h3>
+                                                                        <p>KNOCK AN ENEMY INTO YOUR STEEL TRAP USING JUNKRAT'S CONCUSSION MINE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="raid_wipe" ng-src="{{raid_wipe}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>RAID WIPE</h3>
+                                                                        <p>KILL 4 ENEMIES DURING A SINGLE USE OF TORBJÖRN'S MOLTEN CORE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="roadkill" ng-src="{{roadkill}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ROADKILL</h3>
+                                                                        <p>KILL 4 ENEMIES WITH A SINGLE USE OF JUNKRAT'S RIP-TIRE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="simple_geometry" ng-src="{{simple_geometry}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SIMPLE GEOMETRY</h3>
+                                                                        <p>GET 2 KILLING BLOWS WITH A SINGLE USE OF HANZO'S SCATTER ARROW IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="smooth_as_silk" ng-src="{{smooth_as_silk}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SMOOTH AS SILK</h3>
+                                                                        <p>KILL AN ENEMY WITH A SCOPED HEADSHOT WHILE AIRBORNE AS WIDOWMAKER IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_dragon_is_sated" ng-src="{{the_dragon_is_sated}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE DRAGON IS SATED</h3>
+                                                                        <p>KILL 4 ENEMIES WITH ONE OF HANZO'S SPIRIT DRAGONS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="triple_threat" ng-src="{{triple_threat}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>TRIPLE THREAT</h3>
+                                                                        <p>KILL 2 ENEMIES IN EACH OF BASTION'S CONFIGURATIONS WITHOUT DYING IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                    </md-content>
+                                                </div>
+                                            </div>
+                                            <div ng-switch-when= "Tank">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="anger_management" ng-src="{{anger_management}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ANGER MANAGEMENT</h3>
+                                                                        <p>DAMAGE 6 ENEMIES DURING A SINGLE USE OF WINSTON'S PRIMAL RAGE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="game_over" ng-src="{{game_over}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>GAME OVER</h3>
+                                                                        <p>KILL 4 ENEMIES WITH A SINGLE USE OF D.VA'S SELF DESTRUCT IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="giving_you_the_hook" ng-src="{{giving_you_the_hook}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>GIVING YOU THE HOOK</h3>
+                                                                        <p>INTERRUPT AN ENEMY ULTIMATE ABILITY WITH ROADHOG'S HOOK IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="halt_state" ng-src="{{halt_state}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HALT STATE</h3>
+                                                                        <p>PULL ENEMIES INTO 1000 DAMAGE WITH A SINGLE USE OF ORISA'S HALT! IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="hog_wild" ng-src="{{hog_wild}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HOG WILD</h3>
+                                                                        <p>KNOCK 2 ENEMIES TO THEIR DEATHS WITH ONE USE OF ROADHOG'S WHOLE HOG IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="i_am_your_shield" ng-src="{{i_am_your_shield}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>I AM YOUR SHIELD</h3>
+                                                                        <p>BLOCK 8000 DAMAGE WITH REINHARDT'S BARRIER FIELD WITHOUT DYING IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="mine_sweeper" ng-src="{{mine_sweeper}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>MINE SWEEPER</h3>
+                                                                        <p>DESTROY 10 TURRETS OR TRAPS USING WINSTON'S TESLA CANNON WITHOUT DYING IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="overclocked" ng-src="{{overclocked}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>OVERCLOCKED</h3>
+                                                                        <p>AMPLIFY 900 DAMAGE WITH A SINGLE USE OF ORISA'S SUPERCHARGER IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="power_overwhelming" ng-src="{{power_overwhelming}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>POWER OVERWHELMING</h3>
+                                                                        <p>KEEP ZARYA'S PARTICLE CANNON ABOVE 70 POWER FOR 60 SECONDS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="shot_down" ng-src="{{shot_down}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SHOT DOWN</h3>
+                                                                        <p>PREVENT 1500 DAMAGE WITH A SINGLE USE OF D.VA'S DEFENSE MATRIX IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="storm_earth_and_fire" ng-src="{{storm_earth_and_fire}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>STORM, EARTH, AND FIRE</h3>
+                                                                        <p>LAND REINHARDT'S FIRE STRIKE AND CHARGE AFTER AN EARTHSHATTER STUN IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_power_of_attraction" ng-src="{{the_power_of_attraction}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE POWER OF ATTRACTION</h3>
+                                                                        <p>CAPTURE 5 ENEMIES IN A SINGLE USE OF ZARYA'S GRAVITON SURGE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                    </md-content>
+                                                </div>
+                                            </div>
+                                            <div ng-switch-when= "Support">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="enabler" ng-src="{{enabler}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ENABLER</h3>
+                                                                        <p>GET 4 KILLS OR ASSISTS WITH A SINGLE USE OF ANA'S NANO BOOST IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="group_health_plan" ng-src="{{group_health_plan}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>GROUP HEALTH PLAN</h3>
+                                                                        <p>RESTORE 200 HEALTH FOR 5 PLAYERS WITHOUT DYING AS MERCY IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="huge_rez" ng-src="{{huge_rez}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HUGE REZ</h3>
+                                                                        <p>RESURRECT 4 PLAYERS AT ONCE WITH MERCY IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="huge_success" ng-src="{{huge_success}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HUGE SUCCESS</h3>
+                                                                        <p>TELEPORT 20 PLAYERS IN A SINGLE QUICK OR COMPETITIVE PLAY GAME AS SYMMETRA.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="naptime" ng-src="{{naptime}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>NAPTIME</h3>
+                                                                        <p>INTERRUPT AN ENEMY ULTIMATE ABILITY WITH ANA'S SLEEP DART IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="rapid_discord" ng-src="{{rapid_discord}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>RAPID DISCORD</h3>
+                                                                        <p>GET 4 KILLS OR ASSISTS WITH ZENYATTA'S ORB OF DISCORD WITHIN 6 SECONDS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="supersonic" ng-src="{{supersonic}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SUPERSONIC</h3>
+                                                                        <p>BLOCK 1000 DAMAGE WITH A SINGLE USE OF LÚCIO'S SOUND BARRIER IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_car_wash" ng-src="{{the_car_wash}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE CAR WASH</h3>
+                                                                        <p>HIT AN ENEMY WITH 6 BEAMS SIMULTANEOUSLY AS SYMMETRA IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_floor_is_lava" ng-src="{{the_floor_is_lava}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE FLOOR IS LAVA</h3>
+                                                                        <p>GET 3 KILLING BLOWS WHILE WALL RIDING AS LÚCIO WITHOUT DYING IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="the_iris_embraces_you" ng-src="{{the_iris_embraces_you}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>THE IRIS EMBRACES YOU</h3>
+                                                                        <p>RESTORE 1500 HEALTH WITH A SINGLE USE OF ZENYATTA'S TRANSCENDENCE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                    </md-content>
+                                                </div>
+                                            </div>
+                                            <div ng-switch-when= "Maps">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="cant_touch_this" ng-src="{{cant_touch_this}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>CAN'T TOUCH THIS</h3>
+                                                                        <p>PREVENT THE ATTACKING TEAM FROM TOUCHING THE PAYLOAD FOR 1 MINUTE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="double_cap" ng-src="{{double_cap}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DOUBLE CAP</h3>
+                                                                        <p>CAPTURE BOTH OBJECTIVES ON A CAPTURE MAP WITHOUT DYING IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="escort_duty" ng-src="{{escort_duty}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>ESCORT DUTY</h3>
+                                                                        <p>PUSH A PAYLOAD 100 METERS WITHOUT LEAVING IT IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="lockdown" ng-src="{{lockdown}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>LOCKDOWN</h3>
+                                                                        <p>WIN A CAPTURE MAP ON DEFENSE WITHOUT LOSING THE FIRST OBJECTIVE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="shutout" ng-src="{{shutout}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SHUTOUT</h3>
+                                                                        <p>WIN A CONTROL MAP WITHOUT THE ENEMY CAPTURING AN OBJECTIVE IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="world_traveler" ng-src="{{world_traveler}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>WORLD TRAVELER</h3>
+                                                                        <p>GET 4 KILLS OR ASSISTS WITH ZENYATTA'S ORB OF DISCORD WITHIN 6 SECONDS IN QUICK OR COMPETITIVE PLAY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>     
+                                                        </div>   
+                                                    </md-content>
+                                                </div>
+                                            </div>
+                                            <div ng-switch-when= "Special">
+                                                <div class="achievementGrid">
+                                                    <md-content class="md-padding">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="ambush" ng-src="{{ambush}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>AMBUSH!</h3>
+                                                                        <p>KILL 3 ENEMIES WHILE THEY ARE PICKING UP SNOW IN A GAME OF MEI'S SNOWBALL OFFENSIVE.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="cleanup_duty" ng-src="{{cleanup_duty}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>CLEANUP DUTY</h3>
+                                                                        <p>RECOVER A FLAG IN A GAME OF CAPTURE THE ROOSTER.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="cool_as_ice" ng-src="{{cool_as_ice}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>COOL AS ICE</h3>
+                                                                        <p>KILL 4 ENEMIES WITHOUT MISSING IN MEI'S SNOWBALL OFFENSIVE.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="distinguished_service" ng-src="{{distinguished_service}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>DISTINGUISHED SERVICE</h3>
+                                                                        <p>COMPLETE UPRISING ON LEGENDARY DIFFICULTY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="flagbearer" ng-src="{{flagbearer}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>FLAGBEARER</h3>
+                                                                        <p>WIN CAPTURE THE ROOSTER WITH A SCORE OF 3 TO 0.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="four_they_were" ng-src="{{four_they_were}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>FOUR THEY WERE</h3>
+                                                                        <p>WIN JUNKENSTEIN'S REVENGE USING EACH OF THE 4 HEROES.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="handle_with_care" ng-src="{{handle_with_care}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HANDLED WITH CARE</h3>
+                                                                        <p>DELIVER THE PAYLOAD WITH OVER 80% HEALTH IN UPRISING ON HARD DIFFICULTY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="held_the_door" ng-src="{{held_the_door}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>HELD THE DOOR</h3>
+                                                                        <p>WIN JUNKENSTEIN'S REVENGE ON HARD DIFFICULTY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="lucio_hat_trick" ng-src="{{lucio_hat_trick}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>LUCIO HAT TRICK</h3>
+                                                                        <p>SCORE A GOAL, A SAVE, AND AN ASSIST IN A GAME OF LÚCIOBALL.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="mission_complete" ng-src="{{mission_complete}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>MISSION COMPLETE</h3>
+                                                                        <p>COMPLETE UPRISING ON HARD DIFFICULTY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="not_a_scratch" ng-src="{{not_a_scratch}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>NOT A SCRATCH</h3>
+                                                                        <p>WIN JUNKENSTEIN'S REVENGE ON MEDIUM DIFFICULTY WITH NO DAMAGE TO THE DOOR.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="replacements" ng-src="{{replacements}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>REPLACEMENTS</h3>
+                                                                        <p>COMPLETE UPRISING (ALL HEROES) WITH 8 DIFFERENT HEROES.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="safe_hands" ng-src="{{safe_hands}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SAFE HANDS</h3>
+                                                                        <p>SCORE 3 SAVES IN A ROW IN LÚCIOBALL.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div> 
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="snowed_in" ng-src="{{snowed_in}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SNOWED IN</h3>
+                                                                        <p>WIN MEI'S SNOWBALL OFFENSIVE WITHOUT LOSING A ROUND.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div> 
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="strike_team" ng-src="{{strike_team}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>STRIKE TEAM</h3>
+                                                                        <p>COMPLETE UPRISING WITH EACH OF THE 4 HEROES.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>   
+                                                            <div class="col-md-3">
+                                                                <md-card style="width:250px;">
+                                                                    <img ng-if="survived_the_night" ng-src="{{survived_the_night}}" style="height: 250px;"/>
+                                                                    <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                        <h3>SURVIVED THE NIGHT</h3>
+                                                                        <p>WIN JUNKENSTEIN'S REVENGE ON MEDIUM DIFFICULTY.</p>
+                                                                    </md-card-content>
+                                                                </md-card>
+                                                            </div>  
+                                                        </div>
+                                                        <div class="row">
+                                                                <div class="col-md-3">
+                                                                    <md-card style="width:250px;">
+                                                                        <img ng-if="unit_commendation" ng-src="{{unit_commendation}}" style="height: 250px;"/>
+                                                                        <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                            <h3>UNIT COMMENDATION</h3>
+                                                                            <p>COMPLETE UPRISING ON EXPERT DIFFICULTY.</p>
+                                                                        </md-card-content>
+                                                                    </md-card>
+                                                                </div> 
+                                                                <div class="col-md-3">
+                                                                    <md-card style="width:250px;">
+                                                                        <img ng-if="volley" ng-src="{{volley}}" style="height: 250px;"/>
+                                                                        <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                            <h3>VOLLEY</h3>
+                                                                            <p>SCORE A GOAL IN LÚCIOBALL WITH A SHOT TAKEN FROM AT LEAST 4 METERS IN THE AIR.</p>
+                                                                        </md-card-content>
+                                                                    </md-card>
+                                                                </div> 
+                                                                <div class="col-md-3">
+                                                                    <md-card style="width:250px;">
+                                                                        <img ng-if="whap" ng-src="{{whap}}" style="height: 250px;"/>
+                                                                        <md-card-content style="overflow-y: auto; height: 140px;">
+                                                                            <h3>WHAP!</h3>
+                                                                            <p>KILL AN ENEMY WITH A SNOWBALL FROM 25 METERS AWAY IN MEI'S SNOWBALL OFFENSIVE.</p>
+                                                                        </md-card-content>
+                                                                    </md-card>
+                                                                </div>   
+                                                               
+                                                            </div>
+                                                    </md-content>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </body>
+    </html>

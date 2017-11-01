@@ -1,0 +1,132 @@
+@font-face { font-family: "Overwatch"; src: url("bignoodletoo.woff") format('woff'); }
+
+.col {
+    border:1px solid #E2C958;
+    background-color: rgba(230, 163, 29, 0.77);
+    color:white;
+    text-align: center;
+}
+.btn-outline-success {
+    color: #FFFFFF;
+    background-color: rgba(76, 119, 236, 0.75);
+    border-color: #9E9DC4; /*set the color you want here*/
+}
+
+.btn-outline-success:hover, .btn-outline-success:focus, .btn-outline-success:active, .btn-outline-success.active, .open>.dropdown-toggle.btn-outline-success {
+    color: #FFFFFF;
+    background-color: #2D47DA;
+    border-color: #8D94D3; /*set the color you want here*/
+}
+.card {
+    background-color: rgba(24, 29, 51, 0.78);
+}
+.navbar-brand {
+    color: #FFFFFF; 
+    font-family:Overwatch;
+    font-size: xx-large;
+}
+.yellow-text {
+    color: #E6A61D;
+}
+.loading-font{
+    color: #FFFFFF;
+    font-family:Overwatch;
+    font-size:xx-large;
+    text-align: right;
+    vertical-align: -50px;
+}
+.cardContent{
+    padding: 5px;
+}
+
+.cardContent table{
+    padding: 10px;
+}
+.player-font{
+    color: #FFFFFF;
+    font-family:Overwatch;
+    font-size: 400%;
+}
+.bnet-num{
+    color: #FFFFFF;
+}
+.icon-border{
+    border:5px solid white;
+}
+.levels{
+    vertical-align: 70px;
+}
+.playerLevel{
+    color:#E6A61D;
+    font-family: "Franklin Gothic Medium";
+    font-size: 20px;
+}
+.playerRank{
+    color: #592ADA;
+    font-family: "Franklin Gothic Medium";
+    font-size: 20px;
+}
+.careerStats{
+    font-family: sans-serif;
+    color: #3786CC;
+}
+hr{
+    padding: 0px;
+    margin-top: -1em;
+    color: #3786CC;
+    background-color: #3786CC;
+    height: 2px;
+}
+
+select{
+    color: #FFFFFF;
+    background-color: rgb(23, 70, 131);
+    border-color: rgb(24, 29, 51);
+}
+
+body {background-image: url("https://i.imgur.com/nxudmIe.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+label {
+    width: 15em;
+    font-size:20px;
+    color: #3786CC;
+    font-family: sans-serif;
+    font-weight:300, auto;
+    text-transform: uppercase
+}
+
+.nav-pills{
+    background-color:#161616;
+    color:#fff;
+    padding:5px;
+    font-size: 24px;
+}
+
+
+.nav-pills >li.active > a, .btn-primary {
+    background-color: rgb(23, 70, 131) !important;
+    border-color: #3786CC !important;
+    border-radius: 5px; 
+    color: #FFFFFF;
+    padding:5px
+}
+
+.achievementGrid md-grid-list {
+    margin: 8px;
+}
+
+.achievementGrid .gray {
+    background: #f5f5f5;
+  }
+  
+  .achievementGrid md-grid-tile {
+    transition: all 400ms ease-out 50ms;
+  }
+
+  .achievementGrid md-card-content {
+      color: #3786CC;
+  }
