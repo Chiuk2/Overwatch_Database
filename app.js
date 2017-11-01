@@ -1,5 +1,5 @@
-var app = angular.module("myApp", ['chart.js'])
-.controller("StatsController", function($scope, $http, $timeout){
+var app = angular.module("myApp", ['chart.js', 'ngMaterial'])
+.controller("StatsController", function($scope, $http){
   $scope.tab = 1;
   $scope.setTab = function(newTab){
       $scope.tab = newTab;
@@ -52,13 +52,12 @@ var app = angular.module("myApp", ['chart.js'])
 };
 
   function fetch(){
-    $timeout(function(){
-        $scope.Loading = "Battletag not found";
-    }, 12000);
       $http.get("https://owapi.net/api/v3/u/" + $scope.user + "/blob")
-      .then(function(response){
+      .then(function successCallback(response){
           $scope.stats = response.data;
-          if($scope.stats.us.achievements!=null){
+          if($scope.stats.msg !=null){
+              $scope.Loading = "Battletag not found"
+          }else if($scope.stats.us.achievements!=null){
             if($scope.stats.us.achievements.general!=null){
                 $scope.general = $scope.stats.us.achievements.general;     
                 if($scope.general.blackjack == true){
@@ -761,6 +760,8 @@ var app = angular.module("myApp", ['chart.js'])
                 $scope.qpMKChart = getData(obj);
             }
             
+      }, function errorCallback(response){
+          $scope.Loading = "Battletag not found";
       });
   }
 
